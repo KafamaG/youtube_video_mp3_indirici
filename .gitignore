@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+build/
+dist/
+installer_output/
+*.spec
+*.cer
+*.exe
+*.zip
+create_icon.py
+version_info.py
