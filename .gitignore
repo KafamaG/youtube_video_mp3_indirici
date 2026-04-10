@@ -7,5 +7,6 @@ installer_output/
 *.cer
 *.exe
 *.zip
+*.iss
 create_icon.py
 version_info.py
