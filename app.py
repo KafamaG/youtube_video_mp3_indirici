@@ -124,7 +124,7 @@ class YouTubeDownloader(ctk.CTk):
         super().__init__()
 
         self.title("YouTube Video/MP3 İndirici")
-        self.geometry("620x580")
+        self.geometry("620x620")
         self.resizable(False, False)
 
         self.download_folder = os.path.join(os.path.expanduser("~"), "Downloads")
@@ -225,6 +225,14 @@ class YouTubeDownloader(ctk.CTk):
         )
         self.download_btn.pack(padx=32, pady=(14, 0), fill="x")
 
+        self.cookie_var = ctk.BooleanVar(value=False)
+        self.cookie_check = ctk.CTkCheckBox(
+            self, text="Chrome çerezlerini kullan (yaş kısıtlamalı videolar için)",
+            variable=self.cookie_var, font=("Segoe UI", 11),
+            text_color="gray"
+        )
+        self.cookie_check.pack(padx=36, pady=(8, 0), anchor="w")
+
         self.progress_bar = ctk.CTkProgressBar(self, height=14, corner_radius=6)
         self.progress_bar.pack(padx=32, pady=(18, 0), fill="x")
         self.progress_bar.set(0)
@@ -315,11 +323,28 @@ class YouTubeDownloader(ctk.CTk):
             )
             ydl_opts["merge_output_format"] = "mp4"
 
-        ydl_opts["cookiesfrombrowser"] = ("chrome",)
-
         try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url])
+            # Try with Chrome cookies first if checkbox is enabled
+            if self.cookie_var.get():
+                ydl_opts["cookiesfrombrowser"] = ("chrome",)
+                try:
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download([url])
+                except Exception as cookie_err:
+                    if "cookie" in str(cookie_err).lower():
+                        # Chrome cookies failed (browser likely open), retry without cookies
+                        self.status_label.configure(
+                            text="Çerezler alınamadı, çerezsiz deneniyor...",
+                            text_color="orange"
+                        )
+                        ydl_opts.pop("cookiesfrombrowser", None)
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                            ydl.download([url])
+                    else:
+                        raise
+            else:
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([url])
 
             self.progress_bar.set(1)
             self.percent_label.configure(text="%100")
