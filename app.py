@@ -4,10 +4,17 @@ import shutil
 import subprocess
 import os
 import sys
+import re
 import zipfile
 import urllib.request
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 import yt_dlp
+
+
+YOUTUBE_URL_RE = re.compile(
+    r'https?://(?:www\.|m\.|music\.)?(?:youtube\.com|youtu\.be)/[^\s,;<>"\']+',
+    re.IGNORECASE,
+)
 
 
 def is_playlist_url(url):
@@ -189,8 +196,7 @@ class ManualLinksDialog(ctk.CTkToplevel):
             self.info_label.configure(text="Önce link yapıştırın.", text_color="#ff8844")
             return
 
-        lines = [ln.strip() for ln in raw.splitlines()]
-        candidates = [ln for ln in lines if ln and ("youtube.com" in ln or "youtu.be" in ln)]
+        candidates = YOUTUBE_URL_RE.findall(raw)
         if not candidates:
             self.info_label.configure(text="Geçerli YouTube linki bulunamadı.", text_color="#ff4444")
             return
@@ -204,11 +210,13 @@ class ManualLinksDialog(ctk.CTkToplevel):
 
         clean = []
         seen = set()
+        dup_in_paste = 0
         for u in candidates:
             if is_playlist_url(u):
                 continue
             cu = clean_video_url(u)
             if cu in seen:
+                dup_in_paste += 1
                 continue
             seen.add(cu)
             clean.append(cu)
@@ -217,7 +225,7 @@ class ManualLinksDialog(ctk.CTkToplevel):
             self.info_label.configure(text="Yalnız playlist link'i bulundu — tekil video link'i yapıştırın.", text_color="#ff4444")
             return
 
-        self.on_submit(clean)
+        self.on_submit(clean, dup_in_paste, playlist_count)
         self.destroy()
 
 
@@ -509,13 +517,13 @@ class YouTubeDownloader(ctk.CTk):
     def _open_manual_dialog(self):
         ManualLinksDialog(self, on_submit=self._add_manual_urls)
 
-    def _add_manual_urls(self, urls):
+    def _add_manual_urls(self, urls, dup_in_paste=0, playlist_skipped=0):
         if self.empty_label.winfo_exists():
             self.empty_label.destroy()
 
         existing = {clean_video_url(it.video_url) for it in self.video_items}
         new_urls = [u for u in urls if u not in existing]
-        skipped = len(urls) - len(new_urls)
+        already_in_list = len(urls) - len(new_urls)
 
         if not new_urls:
             self.status_label.configure(text="Tüm linkler zaten listede.", text_color="#ff8844")
@@ -533,11 +541,19 @@ class YouTubeDownloader(ctk.CTk):
         if not self.list_title.cget("text") or self.list_title.cget("text") == "Liste":
             self.list_title.configure(text="Manuel Liste")
         self.list_count.configure(text=f"({len(self.video_items)} video)")
-        msg = f"{len(new_urls)} link eklendi"
-        if skipped:
-            msg += f" ({skipped} mükerrer atlandı)"
-        msg += ", başlıklar çekiliyor..."
-        self.status_label.configure(text=msg, text_color="#00aaff")
+
+        parts = [f"{len(new_urls)} link eklendi"]
+        skipped_notes = []
+        if dup_in_paste:
+            skipped_notes.append(f"{dup_in_paste} mükerrer")
+        if already_in_list:
+            skipped_notes.append(f"{already_in_list} zaten listede")
+        if playlist_skipped:
+            skipped_notes.append(f"{playlist_skipped} playlist")
+        if skipped_notes:
+            parts.append("(" + ", ".join(skipped_notes) + " atlandı)")
+        parts.append("— başlıklar çekiliyor...")
+        self.status_label.configure(text=" ".join(parts), text_color="#00aaff")
 
         threading.Thread(target=self._enrich_manual, args=(placeholders,), daemon=True).start()
 
