@@ -33,18 +33,6 @@ pip install -r requirements.txt
 python app.py
 ```
 
-### Kendi EXE'nizi Derleyin
-
-Tek tıkla portable bir `.exe` üretmek için:
-
-```bash
-build.bat
-```
-
-Çıktı: `dist\YouTubeIndirici.exe`
-
-Build için ek gereksinimler `requirements-dev.txt` içinden otomatik kurulur (PyInstaller, Pillow).
-
 ## Gereksinimler
 
 - Python 3.10+
