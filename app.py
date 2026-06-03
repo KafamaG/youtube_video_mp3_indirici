@@ -353,9 +353,23 @@ class YouTubeDownloader(ctk.CTk):
         self.video_items = []
         self._stop_flag = False
         self._theme = "dark"
+        self._upper_collapsed = False
 
         self._build_ui()
         self._check_dependencies()
+
+    def _toggle_upper_panels(self):
+        self._upper_collapsed = not self._upper_collapsed
+        if self._upper_collapsed:
+            self.source_card.pack_forget()
+            self.settings_card.pack_forget()
+            self.expand_btn.configure(text="▾  Daralt")
+        else:
+            self.source_card.pack(padx=20, fill="x", pady=(10, 0),
+                                  before=self.list_card)
+            self.settings_card.pack(padx=20, fill="x", pady=(10, 0),
+                                    before=self.list_card)
+            self.expand_btn.configure(text="▴  Genişlet")
 
     def _toggle_theme(self):
         self._theme = "light" if self._theme == "dark" else "dark"
@@ -430,8 +444,8 @@ class YouTubeDownloader(ctk.CTk):
             corner_radius=8, command=self._install_ffmpeg
         )
 
-        source_card = self._make_card(self, pady=(10, 0))
-        src_inner = ctk.CTkFrame(source_card, fg_color="transparent")
+        self.source_card = self._make_card(self, pady=(10, 0))
+        src_inner = ctk.CTkFrame(self.source_card, fg_color="transparent")
         src_inner.pack(fill="x", padx=14, pady=10)
 
         ctk.CTkLabel(src_inner, text="KAYNAK",
@@ -468,8 +482,8 @@ class YouTubeDownloader(ctk.CTk):
         )
         self.manual_btn.pack(side="right", padx=(0, 6))
 
-        settings_card = self._make_card(self, pady=(10, 0))
-        set_inner = ctk.CTkFrame(settings_card, fg_color="transparent")
+        self.settings_card = self._make_card(self, pady=(10, 0))
+        set_inner = ctk.CTkFrame(self.settings_card, fg_color="transparent")
         set_inner.pack(fill="x", padx=14, pady=10)
 
         ctk.CTkLabel(set_inner, text="İNDİRME AYARLARI",
@@ -537,10 +551,10 @@ class YouTubeDownloader(ctk.CTk):
         )
         browse_btn.pack(side="right")
 
-        list_card = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12,
-                                  border_width=1, border_color=COLOR_BORDER)
+        self.list_card = ctk.CTkFrame(self, fg_color=COLOR_CARD, corner_radius=12,
+                                       border_width=1, border_color=COLOR_BORDER)
 
-        list_header = ctk.CTkFrame(list_card, fg_color="transparent")
+        list_header = ctk.CTkFrame(self.list_card, fg_color="transparent")
         list_header.pack(padx=16, fill="x", pady=(12, 6))
 
         title_frame = ctk.CTkFrame(list_header, fg_color="transparent")
@@ -563,9 +577,19 @@ class YouTubeDownloader(ctk.CTk):
             text_color=COLOR_TEXT, checkbox_width=18, checkbox_height=18,
             corner_radius=4, command=self._toggle_select_all
         )
-        self.select_all_check.pack(side="right")
+        self.select_all_check.pack(side="right", padx=(0, 8))
 
-        search_row = ctk.CTkFrame(list_card, fg_color="transparent")
+        self.expand_btn = ctk.CTkButton(
+            list_header, text="▴  Genişlet", width=96, height=26,
+            font=("Segoe UI", 11), corner_radius=6,
+            fg_color=COLOR_CARD_ALT, hover_color=COLOR_HOVER_SUBTLE,
+            text_color=COLOR_TEXT,
+            border_width=1, border_color=COLOR_BORDER,
+            command=self._toggle_upper_panels,
+        )
+        self.expand_btn.pack(side="right", padx=(0, 8))
+
+        search_row = ctk.CTkFrame(self.list_card, fg_color="transparent")
         search_row.pack(padx=16, fill="x", pady=(0, 6))
 
         self.search_var = ctk.StringVar()
@@ -591,7 +615,7 @@ class YouTubeDownloader(ctk.CTk):
         self.search_var.trace_add("write", lambda *_: self._filter_list())
 
         self.list_frame = ctk.CTkScrollableFrame(
-            list_card, height=140, fg_color="transparent", corner_radius=0
+            self.list_card, height=140, fg_color="transparent", corner_radius=0
         )
         self.list_frame.pack(padx=10, pady=(0, 12), fill="both", expand=True)
 
@@ -636,7 +660,7 @@ class YouTubeDownloader(ctk.CTk):
         )
         self.clear_btn.pack(side="right")
 
-        list_card.pack(padx=20, pady=(10, 0), fill="both", expand=True)
+        self.list_card.pack(padx=20, pady=(10, 0), fill="both", expand=True)
 
         prog_inner = ctk.CTkFrame(progress_card, fg_color="transparent")
         prog_inner.pack(fill="x", padx=14, pady=10)
