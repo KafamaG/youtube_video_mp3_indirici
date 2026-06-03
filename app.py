@@ -829,6 +829,11 @@ class YouTubeDownloader(ctk.CTk):
             "no_warnings": True,
             "extract_flat": "in_playlist",
             "skip_download": True,
+            "playliststart": 1,
+            "playlistend": None,
+            "playlist_items": None,
+            "lazy_playlist": False,
+            "ignoreerrors": True,
         }
         if self.cookie_var.get():
             opts["cookiesfrombrowser"] = ("chrome",)
