@@ -1,8 +1,8 @@
-# YouTube Video & MP3 İndirici
+# YouTube Video & MP3 İndirici (PlaylistSlayer)
 
 Modern arayüzlü, paralel indirme destekli YouTube video / MP3 indirici masaüstü uygulaması.
 
-[![Windows](https://img.shields.io/badge/Windows-blue?style=flat-square&logo=windows&logoColor=white)](https://github.com/KafamaG/youtube_video_mp3_indirici/releases/latest)
+[![Windows](https://img.shields.io/badge/Windows-blue?style=flat-square&logo=windows&logoColor=white)](https://github.com/tbsagdic/PlaylistSlayer/releases/latest)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-green?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
@@ -22,13 +22,13 @@ Modern arayüzlü, paralel indirme destekli YouTube video / MP3 indirici masaüs
 
 ### Hazır EXE İndir
 
-[![Windows İndir](https://img.shields.io/badge/⬇_İndir-Windows_EXE-blue?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/KafamaG/youtube_video_mp3_indirici/releases/latest)
+[![Windows İndir](https://img.shields.io/badge/⬇_İndir-Windows_EXE-blue?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/tbsagdic/PlaylistSlayer/releases/latest)
 
 ### Kaynaktan Çalıştırma
 
 ```bash
-git clone https://github.com/KafamaG/youtube_video_mp3_indirici.git
-cd youtube_video_mp3_indirici
+git clone https://github.com/tbsagdic/PlaylistSlayer.git
+cd PlaylistSlayer
 pip install -r requirements.txt
 python app.py
 ```
